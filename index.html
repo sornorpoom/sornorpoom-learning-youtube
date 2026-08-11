@@ -282,8 +282,11 @@
         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-muted)]">
           <i class="fa-solid fa-magnifying-glass text-xs"></i>
         </span>
-        <input type="text" id="searchInput" oninput="filterVideos()" placeholder="ค้นหาสื่อ/หัวข้อ/คำสำคัญ..." 
-               class="w-full pl-9 pr-4 py-2 rounded-xl text-xs app-input outline-none focus:ring-2 focus:ring-indigo-500">
+        <input type="text" id="searchInput" oninput="onSearchInput()" placeholder="ค้นหาสื่อ/หัวข้อ/คำสำคัญ..." 
+               class="w-full pl-9 pr-9 py-2 rounded-xl text-xs app-input outline-none focus:ring-2 focus:ring-indigo-500">
+        <button id="searchClearBtn" onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors hidden" title="ล้างการค้นหา">
+          <i class="fa-solid fa-circle-xmark text-sm"></i>
+        </button>
       </div>
 
       <!-- Playlist Filter Dropdown -->
@@ -972,7 +975,44 @@
      */
     function refreshData() {
       if (isRefreshing) return;
+      // Clear search when reloading to ensure clean state
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.value = '';
+      const clearBtn = document.getElementById('searchClearBtn');
+      if (clearBtn) clearBtn.classList.add('hidden');
       loadData();
+    }
+
+    /**
+     * Handle search input changes to toggle the clear button visibility
+     */
+    function onSearchInput() {
+      const input = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('searchClearBtn');
+      if (input && clearBtn) {
+        if (input.value.length > 0) {
+          clearBtn.classList.remove('hidden');
+        } else {
+          clearBtn.classList.add('hidden');
+        }
+      }
+      filterVideos();
+    }
+
+    /**
+     * Reset the search input and re-filter
+     */
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('searchClearBtn');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      if (clearBtn) {
+        clearBtn.classList.add('hidden');
+      }
+      filterVideos();
     }
   </script>
 </body>
