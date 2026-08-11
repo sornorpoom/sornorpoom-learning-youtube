@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sornorpoom Learning Portal</title>
+  <!-- Google Fonts: Sarabun for Thai, Outfit for English & UI elements -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for beautiful modern icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* Base Font Family */
+    body {
+      font-family: 'Sarabun', 'Outfit', sans-serif;
+    }
+
+    /* CSS Variable Definitions for Themes */
+    body.theme-light {
+      --bg-primary: #f8fafc; /* Slate 50 */
+      --bg-card: #ffffff;
+      --bg-header: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); /* Indigo 950 to 900 */
+      --bg-header-solid: #1e1b4b;
+      --text-header-title: #ffffff;
+      --text-header-sub: #c7d2fe; /* Indigo 200 */
+      --text-primary: #0f172a; /* Slate 900 */
+      --text-secondary: #334155; /* Slate 700 */
+      --text-muted: #64748b; /* Slate 500 */
+      --border-color: #e2e8f0; /* Slate 200 */
+      --bg-input: #ffffff;
+      --text-input: #0f172a;
+      --border-input: #cbd5e1; /* Slate 300 */
+      --accent-color: #4f46e5; /* Indigo 600 */
+      --accent-hover: #4338ca;
+      --bg-scroll-track: #f1f5f9;
+      --bg-scroll-thumb: #cbd5e1;
+      --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --card-hover-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --badge-bg: #e0e7ff; /* Indigo 100 */
+      --badge-text: #4338ca; /* Indigo 700 */
+    }
+
+    body.theme-warm {
+      --bg-primary: #fdfaf2; /* Soft sepia cream */
+      --bg-card: #fcfaf4;
+      --bg-header: linear-gradient(135deg, #4e342e 0%, #5d4037 100%); /* Warm brown 800 to 700 */
+      --bg-header-solid: #4e342e;
+      --text-header-title: #fff8e1; /* Warm amber 50 */
+      --text-header-sub: #d7ccc8; /* Warm brown 100 */
+      --text-primary: #3e2723; /* Dark brown 900 */
+      --text-secondary: #5d4037; /* Medium brown 800 */
+      --text-muted: #8d6e63; /* Light brown 600 */
+      --border-color: #ebdcb9; /* Soft golden sand border */
+      --bg-input: #fffefc;
+      --text-input: #3e2723;
+      --border-input: #d7ccc8;
+      --accent-color: #8d6e63; /* Warm amber/brown */
+      --accent-hover: #795548;
+      --bg-scroll-track: #efebe9;
+      --bg-scroll-thumb: #d7ccc8;
+      --card-shadow: 0 4px 6px -1px rgb(62 39 35 / 0.04), 0 2px 4px -2px rgb(62 39 35 / 0.04);
+      --card-hover-shadow: 0 10px 15px -3px rgb(62 39 35 / 0.08), 0 4px 6px -4px rgb(62 39 35 / 0.08);
+      --badge-bg: #efebe9;
+      --badge-text: #5d4037;
+    }
+
+    body.theme-dark {
+      --bg-primary: #090d16; /* Deep black-blue */
+      --bg-card: #151b26; /* Dark navy card */
+      --bg-header: linear-gradient(135deg, #0e121b 0%, #151b26 100%);
+      --bg-header-solid: #0e121b;
+      --text-header-title: #f3f4f6; /* Gray 100 */
+      --text-header-sub: #9ca3af; /* Gray 400 */
+      --text-primary: #f3f4f6;
+      --text-secondary: #cbd5e1; /* Gray 300 */
+      --text-muted: #9ca3af;
+      --border-color: #222a3a;
+      --bg-input: #1a2332;
+      --text-input: #f3f4f6;
+      --border-input: #2a354a;
+      --accent-color: #3b82f6; /* Blue 500 */
+      --accent-hover: #2563eb;
+      --bg-scroll-track: #0e121b;
+      --bg-scroll-thumb: #222a3a;
+      --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+      --card-hover-shadow: 0 12px 20px -3px rgb(0 0 0 / 0.4), 0 4px 8px -4px rgb(0 0 0 / 0.4);
+      --badge-bg: #1e293b; /* Slate 800 */
+      --badge-text: #93c5fd; /* Blue 300 */
+    }
+
+    /* Font Size Configurations */
+    body.font-sm {
+      --font-scale-base: 0.8125rem; /* 13px */
+      --font-scale-title: 0.9375rem; /* 15px */
+      --font-scale-desc: 0.75rem; /* 12px */
+      --font-scale-meta: 0.6875rem; /* 11px */
+    }
+    body.font-md {
+      --font-scale-base: 0.9375rem; /* 15px */
+      --font-scale-title: 1.0625rem; /* 17px */
+      --font-scale-desc: 0.875rem; /* 14px */
+      --font-scale-meta: 0.75rem; /* 12px */
+    }
+    body.font-lg {
+      --font-scale-base: 1.125rem; /* 18px */
+      --font-scale-title: 1.3125rem; /* 21px */
+      --font-scale-desc: 1.0625rem; /* 17px */
+      --font-scale-meta: 0.9375rem; /* 15px */
+    }
+
+    /* Apply styles dynamically via classes */
+    .app-bg {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .app-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+      transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+    }
+    .app-card:hover {
+      box-shadow: var(--card-hover-shadow);
+      transform: translateY(-4px);
+    }
+    .app-header {
+      background: var(--bg-header);
+      color: var(--text-header-title);
+      transition: background 0.3s;
+    }
+    .app-border {
+      border-color: var(--border-color);
+      transition: border-color 0.3s;
+    }
+    .app-text-primary {
+      color: var(--text-primary);
+      transition: color 0.3s;
+    }
+    .app-text-secondary {
+      color: var(--text-secondary);
+      transition: color 0.3s;
+    }
+    .app-text-muted {
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    .app-input {
+      background-color: var(--bg-input);
+      color: var(--text-input);
+      border: 1px solid var(--border-input);
+      transition: all 0.3s;
+    }
+    .app-input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+    }
+    .app-badge {
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      transition: all 0.3s;
+    }
+
+    /* Set Font Sizes based on scale variables */
+    .text-base-scale { font-size: var(--font-scale-base); }
+    .text-title-scale { font-size: var(--font-scale-title); font-weight: 600; line-height: 1.35; }
+    .text-desc-scale { font-size: var(--font-scale-desc); line-height: 1.5; }
+    .text-meta-scale { font-size: var(--font-scale-meta); }
+
+    /* Custom Webkit scrollbar styles */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background-color: var(--bg-scroll-track);
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--bg-scroll-thumb);
+      border-radius: 9999px;
+    }
+
+    /* Spin Animation */
+    @keyframes spin-custom {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-custom {
+      animation: spin-custom 1s linear infinite;
+    }
+
+    /* Control Button active highlighting */
+    .btn-control {
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    body.theme-light .btn-control.active-control {
+      background-color: #4f46e5;
+      color: #ffffff;
+      border-color: #4338ca;
+    }
+    body.theme-warm .btn-control.active-control {
+      background-color: #8d6e63;
+      color: #ffffff;
+      border-color: #795548;
+    }
+    body.theme-dark .btn-control.active-control {
+      background-color: #3b82f6;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+  </style>
+</head>
+<body class="theme-light font-md app-bg min-h-screen flex flex-col transition-all duration-300">
+
+  <!-- Header Section -->
+  <header class="app-header shadow-lg sticky top-0 z-50 transition-all duration-300">
+    <!-- Header top: title, theme adjustments, refresh button -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <!-- Title & Branding -->
+      <div class="flex items-center gap-3 self-start md:self-auto">
+        <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white text-lg shadow-inner">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-wide text-white font-sans flex items-center gap-2">
+            Sornorpoom Learning Portal
+          </h1>
+          <p class="text-xs text-[var(--text-header-sub)]">
+            คลังเรียนรู้ดิจิทัล สื่อและนวัตกรรมการศึกษา ศน.ภูมิ
+          </p>
+        </div>
+      </div>
+      
+      <!-- Interactive Settings Panel -->
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+        <!-- Font Size Controls (ก-, ก, ก+) -->
+        <div class="flex items-center bg-white/10 p-1 rounded-lg border border-white/10 backdrop-blur-sm">
+          <button id="font-btn-sm" onclick="setFontSize('sm')" class="btn-control px-2.5 py-1 text-xs text-white rounded font-medium" title="ฟอนต์เล็ก">
+            ก-
+          </button>
+          <button id="font-btn-md" onclick="setFontSize('md')" class="btn-control px-3 py-1 text-xs text-white rounded font-medium" title="ฟอนต์กลาง">
+            ก
+          </button>
+          <button id="font-btn-lg" onclick="setFontSize('lg')" class="btn-control px-2.5 py-1 text-xs text-white rounded font-medium" title="ฟอนต์ใหญ่">
+            ก+
+          </button>
+        </div>
+
+        <!-- Theme Controls (สว่าง, อบอุ่น, มืด) -->
+        <div class="flex items-center bg-white/10 p-1 rounded-lg border border-white/10 backdrop-blur-sm">
+          <button id="theme-btn-light" onclick="setTheme('light')" class="btn-control px-2.5 py-1 text-xs text-white rounded flex items-center gap-1 font-medium" title="ธีมสว่าง">
+            <i class="fa-solid fa-sun text-[10px]"></i> สว่าง
+          </button>
+          <button id="theme-btn-warm" onclick="setTheme('warm')" class="btn-control px-2.5 py-1 text-xs text-white rounded flex items-center gap-1 font-medium" title="ธีมอบอุ่น">
+            <i class="fa-solid fa-mug-hot text-[10px]"></i> อบอุ่น
+          </button>
+          <button id="theme-btn-dark" onclick="setTheme('dark')" class="btn-control px-2.5 py-1 text-xs text-white rounded flex items-center gap-1 font-medium" title="ธีมมืด">
+            <i class="fa-solid fa-moon text-[10px]"></i> มืด
+          </button>
+        </div>
+
+        <!-- Refresh Button -->
+        <button id="refreshBtn" onclick="refreshData()" 
+                class="w-9 h-9 flex items-center justify-center bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-lg border border-white/15 transition backdrop-blur-sm"
+                title="รีเฟรชข้อมูลในระบบ">
+          <i id="refreshIcon" class="fa-solid fa-rotate"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Header bottom border decoration -->
+    <div class="h-1 bg-gradient-to-r from-red-500 via-amber-500 to-indigo-500"></div>
+  </header>
+
+  <!-- Filter & Search Controls bar -->
+  <div class="bg-[var(--bg-card)] border-b border-[var(--border-color)] py-4 shadow-sm sticky top-[73px] sm:top-[77px] md:top-[81px] z-40 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center gap-3">
+      <!-- Search Input -->
+      <div class="relative w-full md:w-80">
+        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-muted)]">
+          <i class="fa-solid fa-magnifying-glass text-xs"></i>
+        </span>
+        <input type="text" id="searchInput" oninput="filterVideos()" placeholder="ค้นหาสื่อ/หัวข้อ/คำสำคัญ..." 
+               class="w-full pl-9 pr-4 py-2 rounded-xl text-xs app-input outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <!-- Playlist Filter Dropdown -->
+      <div class="relative w-full md:w-72">
+        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-muted)]">
+          <i class="fa-solid fa-layer-group text-xs"></i>
+        </span>
+        <select id="playlistSelect" onchange="filterVideos()" 
+                class="w-full pl-9 pr-8 py-2 rounded-xl text-xs app-input outline-none appearance-none cursor-pointer">
+          <option value="ALL">-- ทุก Playlist --</option>
+        </select>
+        <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[var(--text-muted)]">
+          <i class="fa-solid fa-chevron-down text-[10px]"></i>
+        </span>
+      </div>
+
+      <!-- Target Audience Filter -->
+      <div class="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] mt-1 md:mt-0">
+        <i class="fa-solid fa-bullseye text-red-500"></i>
+        <span>เป้าหมายหลัก:</span>
+        <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 text-[10px]">ผู้บริหาร</span>
+        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px]">ครูผู้สอน</span>
+        <span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[10px]">ศึกษานิเทศก์</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full">
+    
+
+
+    <!-- Stats & Filters Status Bar -->
+    <div class="flex justify-between items-center mb-6 text-xs text-[var(--text-muted)] px-1">
+      <div id="resultsCount">กำลังประมวลผลข้อมูล...</div>
+      <div id="sourceIndicator" class="flex items-center gap-1.5 font-medium">
+        <span class="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
+        <span id="sourceText">กำลังเชื่อมต่อฐานข้อมูล...</span>
+      </div>
+    </div>
+
+    <!-- Video Grid Container -->
+    <div id="videoContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Loading Skeleton Skeletons -->
+      <div class="animate-pulse app-card rounded-2xl overflow-hidden shadow-sm flex flex-col h-full min-h-[350px]">
+        <div class="aspect-video bg-slate-200 dark:bg-slate-800"></div>
+        <div class="p-4 flex-1 flex flex-col justify-between gap-3">
+          <div class="space-y-2">
+            <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded-md w-3/4"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-1/2"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-full"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-5/6"></div>
+          </div>
+          <div class="h-8 bg-slate-200 dark:bg-slate-800 rounded-md w-full mt-4"></div>
+        </div>
+      </div>
+      <div class="animate-pulse app-card rounded-2xl overflow-hidden shadow-sm flex flex-col h-full min-h-[350px]">
+        <div class="aspect-video bg-slate-200 dark:bg-slate-800"></div>
+        <div class="p-4 flex-1 flex flex-col justify-between gap-3">
+          <div class="space-y-2">
+            <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded-md w-3/4"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-1/2"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-full"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-5/6"></div>
+          </div>
+          <div class="h-8 bg-slate-200 dark:bg-slate-800 rounded-md w-full mt-4"></div>
+        </div>
+      </div>
+      <div class="animate-pulse app-card rounded-2xl overflow-hidden shadow-sm flex flex-col h-full min-h-[350px]">
+        <div class="aspect-video bg-slate-200 dark:bg-slate-800"></div>
+        <div class="p-4 flex-1 flex flex-col justify-between gap-3">
+          <div class="space-y-2">
+            <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded-md w-3/4"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-1/2"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-full"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-5/6"></div>
+          </div>
+          <div class="h-8 bg-slate-200 dark:bg-slate-800 rounded-md w-full mt-4"></div>
+        </div>
+      </div>
+      <div class="animate-pulse app-card rounded-2xl overflow-hidden shadow-sm flex flex-col h-full min-h-[350px]">
+        <div class="aspect-video bg-slate-200 dark:bg-slate-800"></div>
+        <div class="p-4 flex-1 flex flex-col justify-between gap-3">
+          <div class="space-y-2">
+            <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded-md w-3/4"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-1/2"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-full"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded-md w-5/6"></div>
+          </div>
+          <div class="h-8 bg-slate-200 dark:bg-slate-800 rounded-md w-full mt-4"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-border border-t py-6 text-center text-xs app-text-muted bg-[var(--bg-card)] mt-12 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div>
+        © Sornorpoom Learning Portal - สำนักงานศึกษาธิการจังหวัดเชียงใหม่
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="https://docs.google.com/spreadsheets/d/1oPMMySAzOEMWCjTu_xY3OvifTTE-n0r7-DjHQ0PNtz4/edit?usp=sharing" 
+           target="_blank" class="hover:underline text-[var(--accent-color)] flex items-center gap-1">
+          <i class="fa-solid fa-table"></i> Google Sheets ฐานข้อมูล
+        </a>
+        <span class="text-gray-300">|</span>
+        <span class="text-xs">ศน.ภูมิ (ศึกษานิเทศก์เชียงใหม่)</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Global Constants
+    const SPREADSHEET_ID = '1oPMMySAzOEMWCjTu_xY3OvifTTE-n0r7-DjHQ0PNtz4';
+    const PLAYLISTS_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=PLAYLISTS`;
+    const VIDEOS_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=VIDEOS`;
+
+    // State Variables
+    let globalData = { categories: [], playlists: [], videos: [] };
+    let allVideosData = null;         // Full video data (no date limit) loaded in background
+    let allVideosLoading = false;     // Flag: background load in progress
+    let currentCategory = 'ALL';
+    let isRefreshing = false;
+    let playlistsData = null;
+    let videosData = null;
+
+    // Initialize Preferences
+    window.onload = function() {
+      // Load saved preferences
+      const savedFontSize = localStorage.getItem('portal-font-size') || 'md';
+      setFontSize(savedFontSize);
+      
+      const savedTheme = localStorage.getItem('portal-theme') || 'light';
+      setTheme(savedTheme);
+      
+      // Load data
+      loadData();
+    };
+
+    /**
+     * Font Sizing Controller
+     */
+    function setFontSize(size) {
+      document.body.classList.remove('font-sm', 'font-md', 'font-lg');
+      document.body.classList.add('font-' + size);
+      localStorage.setItem('portal-font-size', size);
+      
+      // Toggle button active state
+      document.querySelectorAll('[id^="font-btn-"]').forEach(btn => {
+        btn.classList.remove('active-control');
+      });
+      const activeBtn = document.getElementById('font-btn-' + size);
+      if (activeBtn) activeBtn.classList.add('active-control');
+    }
+
+    /**
+     * Theme Controller
+     */
+    function setTheme(theme) {
+      document.body.classList.remove('theme-light', 'theme-warm', 'theme-dark');
+      document.body.classList.add('theme-' + theme);
+      localStorage.setItem('portal-theme', theme);
+      
+      // Toggle button active state
+      document.querySelectorAll('[id^="theme-btn-"]').forEach(btn => {
+        btn.classList.remove('active-control');
+      });
+      const activeBtn = document.getElementById('theme-btn-' + theme);
+      if (activeBtn) activeBtn.classList.add('active-control');
+    }
+
+    /**
+     * Load Data from either Google Apps Script or direct Google Sheets endpoint
+     */
+    function loadData() {
+      const icon = document.getElementById('refreshIcon');
+      icon.classList.add('animate-spin-custom');
+      isRefreshing = true;
+
+      // Check if running inside Google Apps Script (GAS) Sandbox environment
+      const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
+
+      if (isGAS) {
+        document.getElementById('sourceText').innerText = 'Apps Script Server (Real-time)';
+        google.script.run
+          .withSuccessHandler(function(data) {
+            handleLoadedData(data, 'Apps Script Server');
+          })
+          .withFailureHandler(function(err) {
+            console.error('Failed to load from GAS backend. Falling back to sheets endpoint...', err);
+            loadDataFromSheets();
+          })
+          .getWebData();
+      } else {
+        // Fallback for Vercel/GitHub Pages: Fetch directly from Google Sheets
+        loadDataFromSheets();
+      }
+    }
+
+    /**
+     * Fetch Google Sheet directly and parse response using JSONP to bypass CORS restrictions
+     */
+    function loadDataFromSheets() {
+      document.getElementById('sourceText').innerText = 'Google Sheets Direct (JSONP/Real-time)';
+      
+      // Reset temporary storage
+      playlistsData = null;
+      videosData = null;
+      
+      // Cleanup any existing JSONP scripts to prevent leaks
+      cleanupScript('playlists-jsonp');
+      cleanupScript('videos-jsonp');
+      
+      // Define global callback handlers
+      window.handlePlaylistsResponse = function(response) {
+        playlistsData = response;
+        checkAndProcessData();
+        cleanupScript('playlists-jsonp');
+      };
+      
+      window.handleVideosResponse = function(response) {
+        videosData = response;
+        checkAndProcessData();
+        cleanupScript('videos-jsonp');
+      };
+
+      // Set a connection timeout (12 seconds)
+      const timeoutId = setTimeout(() => {
+        if (!playlistsData || !videosData) {
+          handleLoadError(new Error("Connection timed out. Google Sheet did not respond in time."));
+        }
+      }, 12000);
+      
+      // Save timeout ID to clear it later
+      window.jsonpTimeoutId = timeoutId;
+
+      try {
+        const cacheBuster = `&t=${new Date().getTime()}`;
+        
+        // Calculate date 2 years ago from now dynamically
+        const now = new Date();
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(now.getFullYear() - 2);
+        const yyyy = twoYearsAgo.getFullYear();
+        const mm = String(twoYearsAgo.getMonth() + 1).padStart(2, '0');
+        const dd = String(twoYearsAgo.getDate()).padStart(2, '0');
+        const dateString = `${yyyy}-${mm}-${dd}`;
+        
+        // Construct query to only fetch last 2 years of active/non-hidden videos on the Google Sheets server-side
+        const query = `select A, B, C, D, E, F, G, H, I where E >= '${dateString}' and A != 'Video_ID' and (I is null or I != 'Hide') order by E desc`;
+        const encodedQuery = encodeURIComponent(query);
+        const videosUrlWithQuery = `${VIDEOS_URL}&tq=${encodedQuery}`;
+        
+        // Append scripts dynamically to bypass CORS
+        const playlistsScript = document.createElement('script');
+        playlistsScript.id = 'playlists-jsonp';
+        playlistsScript.src = `${PLAYLISTS_URL}&tqx=responseHandler:handlePlaylistsResponse${cacheBuster}`;
+        playlistsScript.onerror = () => handleLoadError(new Error("Failed to load Playlists script"));
+        
+        const videosScript = document.createElement('script');
+        videosScript.id = 'videos-jsonp';
+        videosScript.src = `${videosUrlWithQuery}&tqx=responseHandler:handleVideosResponse${cacheBuster}`;
+        videosScript.onerror = () => handleLoadError(new Error("Failed to load Videos script"));
+        
+        document.body.appendChild(playlistsScript);
+        document.body.appendChild(videosScript);
+      } catch (err) {
+        handleLoadError(err);
+      }
+    }
+
+    function cleanupScript(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function handleLoadError(err) {
+      console.error(err);
+      clearTimeout(window.jsonpTimeoutId);
+      cleanupScript('playlists-jsonp');
+      cleanupScript('videos-jsonp');
+      
+      document.getElementById('videoContainer').innerHTML = `
+        <div class="col-span-full text-center py-20 text-[var(--text-muted)] text-xs flex flex-col items-center justify-center gap-3">
+          <i class="fa-solid fa-circle-exclamation text-4xl text-red-500"></i>
+          <div>เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล Google Sheets</div>
+          <div class="text-[10px] opacity-75">คำแนะนำ: กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต และสิทธิ์การแชร์ของชีตต้องเป็นสาธารณะ (ทุกคนที่มีลิงก์เข้าถึงได้)</div>
+        </div>
+      `;
+      document.getElementById('resultsCount').innerText = 'เชื่อมต่อล้มเหลว';
+      document.getElementById('sourceText').innerText = 'เชื่อมต่อล้มเหลว';
+      
+      const icon = document.getElementById('refreshIcon');
+      icon.classList.remove('animate-spin-custom');
+      isRefreshing = false;
+    }
+
+    /**
+     * Check if both Sheets data loaded, then process and render
+     */
+    function checkAndProcessData() {
+      if (!playlistsData || !videosData) return; // Wait for both
+      
+      // Clear timeout since both succeeded
+      clearTimeout(window.jsonpTimeoutId);
+
+      try {
+        if (playlistsData.status === 'error' || videosData.status === 'error') {
+          throw new Error("Google Sheets returned an error status");
+        }
+
+        const rawPlaylists = playlistsData.table.rows.map(r => {
+          if (!r || !r.c) return [];
+          return r.c.map(cell => (cell ? cell.v : null));
+        });
+
+        const rawVideos = videosData.table.rows.map(r => {
+          if (!r || !r.c) return [];
+          return r.c.map(cell => (cell ? cell.v : null));
+        });
+
+        // Process sheets data locally, matching code.gs getWebData() logic
+        const playlists = [];
+        const videos = [];
+        const categoriesSet = new Set();
+        const activePlaylistIds = new Set();
+        const playlistCategoryMap = {};
+
+        // 1. Process Playlists (Skip header row 0)
+        for (let i = 1; i < rawPlaylists.length; i++) {
+          const row = rawPlaylists[i];
+          if (!row || row.length < 1 || !row[0]) continue;
+          
+          const plId = row[0];
+          const plTitle = row[1] || '';
+          const plDesc = row[2] || '';
+          const plThumb = row[3] || '';
+          const categoryName = (row[4] || 'อื่นๆ').toString().trim();
+          const targetAudience = row[5] || '';
+          const status = (row[6] || 'Active').toString().trim();
+
+          if (status.toLowerCase() === 'active') {
+            activePlaylistIds.add(plId);
+            if (categoryName) categoriesSet.add(categoryName);
+            playlistCategoryMap[plId] = categoryName;
+
+            playlists.push({
+              id: plId,
+              title: plTitle,
+              description: plDesc,
+              thumbnail: plThumb,
+              category: categoryName,
+              target: targetAudience,
+              status: status
+            });
+          }
+        }
+
+        // 2. Process Videos (Since server filters the header, start at index 0 and dynamically skip if it says 'Video_ID')
+        const now = new Date();
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(now.getFullYear() - 2);
+        const twoYearsAgoTime = twoYearsAgo.getTime();
+
+        for (let i = 0; i < rawVideos.length; i++) {
+          const row = rawVideos[i];
+          if (!row || row.length < 2 || row[0] === 'Video_ID') continue;
+
+          const vId = row[0];
+          const vPlaylistId = row[1];
+          const vTitle = row[2] || '';
+          const vDesc = row[3] || '';
+          const publishedAtVal = row[4];
+          const duration = row[5] || '';
+          const thumbnail = row[6] || '';
+          let resourceLink = row[7] || '';
+          const vStatus = (row[8] || 'Active').toString().trim();
+
+          // Safely parse date
+          let dateObj = new Date(0);
+          if (publishedAtVal) {
+            dateObj = new Date(publishedAtVal);
+            // Handle google visualization date objects (e.g. "Date(2023,7,24)") if strings fail
+            if (isNaN(dateObj.getTime())) {
+              const dateMatch = publishedAtVal.toString().match(/Date\((\d+),(\d+),(\d+)\)/);
+              if (dateMatch) {
+                dateObj = new Date(dateMatch[1], dateMatch[2], dateMatch[3]);
+              }
+            }
+          }
+          const dateTime = dateObj.getTime();
+
+          // Regex fallback if resourceLink is empty in spreadsheet but present in description
+          if (!resourceLink && vDesc) {
+            const driveMatch = vDesc.match(/https:\/\/(drive|docs)\.google\.com\/[^\s]+/g);
+            if (driveMatch) resourceLink = driveMatch[0];
+          }
+
+          // Apply server conditions: Last 2 years + Active playlist + Video not hidden
+          if (dateTime >= twoYearsAgoTime && vStatus.toLowerCase() !== 'hide' && activePlaylistIds.has(vPlaylistId)) {
+            const categoryName = playlistCategoryMap[vPlaylistId] || 'ทั่วไป';
+            videos.push({
+              id: vId,
+              playlistId: vPlaylistId,
+              title: vTitle,
+              description: vDesc,
+              rawDate: dateTime,
+              publishedAt: dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }),
+              duration: duration,
+              thumbnail: thumbnail,
+              resourceLink: resourceLink,
+              category: categoryName
+            });
+          }
+        }
+
+        // Sort videos from newest to oldest
+        videos.sort((a, b) => b.rawDate - a.rawDate);
+
+        const dataObj = {
+          categories: Array.from(categoriesSet),
+          playlists: playlists,
+          videos: videos,
+          playlistCategoryMap: playlistCategoryMap,
+          activePlaylistIds: activePlaylistIds
+        };
+
+        handleLoadedData(dataObj, 'Google Sheets');
+
+        // After initial 2-year data is displayed, load ALL videos in background
+        // so that playlist-specific selection can show full history
+        if (!allVideosLoading && !allVideosData) {
+          loadAllVideosInBackground(playlistCategoryMap, activePlaylistIds);
+        }
+
+      } catch (err) {
+        handleLoadError(err);
+      }
+    }
+
+    /**
+     * Load the FULL video history (no date filter) in the background.
+     * Result is stored in allVideosData so filterVideos() can use it
+     * when a specific playlist is selected by the user.
+     */
+    function loadAllVideosInBackground(playlistCategoryMap, activePlaylistIds) {
+      allVideosLoading = true;
+      cleanupScript('all-videos-jsonp');
+
+      window.handleAllVideosResponse = function(response) {
+        cleanupScript('all-videos-jsonp');
+        allVideosLoading = false;
+        try {
+          if (!response || response.status === 'error') return;
+
+          const rawVideos = response.table.rows.map(r => {
+            if (!r || !r.c) return [];
+            return r.c.map(cell => (cell ? cell.v : null));
+          });
+
+          const allVids = [];
+          for (let i = 0; i < rawVideos.length; i++) {
+            const row = rawVideos[i];
+            if (!row || row.length < 2 || row[0] === 'Video_ID') continue;
+
+            const vId = row[0];
+            const vPlaylistId = row[1];
+            const vTitle = row[2] || '';
+            const vDesc = row[3] || '';
+            const publishedAtVal = row[4];
+            const duration = row[5] || '';
+            const thumbnail = row[6] || '';
+            let resourceLink = row[7] || '';
+            const vStatus = (row[8] || 'Active').toString().trim();
+
+            if (!activePlaylistIds.has(vPlaylistId)) continue;
+            if (vStatus.toLowerCase() === 'hide') continue;
+
+            let dateObj = new Date(0);
+            if (publishedAtVal) {
+              dateObj = new Date(publishedAtVal);
+              if (isNaN(dateObj.getTime())) {
+                const m = publishedAtVal.toString().match(/Date\((\d+),(\d+),(\d+)\)/);
+                if (m) dateObj = new Date(m[1], m[2], m[3]);
+              }
+            }
+
+            if (!resourceLink && vDesc) {
+              const driveMatch = vDesc.match(/https:\/\/(drive|docs)\.google\.com\/[^\s]+/g);
+              if (driveMatch) resourceLink = driveMatch[0];
+            }
+
+            const categoryName = playlistCategoryMap[vPlaylistId] || 'ทั่วไป';
+            allVids.push({
+              id: vId,
+              playlistId: vPlaylistId,
+              title: vTitle,
+              description: vDesc,
+              rawDate: dateObj.getTime(),
+              publishedAt: dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }),
+              duration: duration,
+              thumbnail: thumbnail,
+              resourceLink: resourceLink,
+              category: categoryName
+            });
+          }
+          allVids.sort((a, b) => b.rawDate - a.rawDate);
+          allVideosData = allVids;
+        } catch (e) {
+          console.warn('Background full-video load failed:', e);
+        }
+      };
+
+      try {
+        const cacheBuster = `&t=${new Date().getTime()}`;
+        // Fetch ALL videos (active + non-hidden only, no date restriction)
+        const query = `select A, B, C, D, E, F, G, H, I where A != 'Video_ID' and (I is null or I != 'Hide') order by E desc`;
+        const encodedQuery = encodeURIComponent(query);
+        const script = document.createElement('script');
+        script.id = 'all-videos-jsonp';
+        script.src = `${VIDEOS_URL}&tq=${encodedQuery}&tqx=responseHandler:handleAllVideosResponse${cacheBuster}`;
+        script.onerror = () => { cleanupScript('all-videos-jsonp'); allVideosLoading = false; };
+        document.body.appendChild(script);
+      } catch (e) {
+        allVideosLoading = false;
+      }
+    }
+
+    /**
+     * Handle the fully parsed data object and build UI filters
+     */
+    function handleLoadedData(data, sourceName) {
+      globalData = data;
+      
+      // Update data source text
+      document.getElementById('sourceText').innerText = sourceName + ' (อัปเดตแบบเรียลไทม์)';
+
+      // 1. Build Playlist Dropdown items
+      renderPlaylistDropdown(data.playlists);
+
+      // 2. Render Videos
+      renderVideos(data.videos);
+
+      // Remove spin animation from refresh button
+      const icon = document.getElementById('refreshIcon');
+      icon.classList.remove('animate-spin-custom');
+      isRefreshing = false;
+    }
+
+    /**
+     * Renders items into Playlist Selection Dropdown
+     */
+    function renderPlaylistDropdown(playlists) {
+      const select = document.getElementById('playlistSelect');
+      
+      // Remove previous options, saving option 0 ("-- ทุก Playlist --")
+      const allOpt = select.options[0];
+      select.innerHTML = '';
+      select.appendChild(allOpt);
+
+      playlists.forEach(pl => {
+        const opt = document.createElement('option');
+        opt.value = pl.id;
+        opt.innerText = pl.title;
+        // Option styles automatically adapt to dropdown themes in standard browsers
+        select.appendChild(opt);
+      });
+    }
+
+    /**
+     * Master Filter logic combining Playlist dropdown and Search input text.
+     * When a specific playlist is selected, uses allVideosData (full history)
+     * if available; otherwise falls back to the 2-year initial load.
+     */
+    function filterVideos() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const selectedPlaylist = document.getElementById('playlistSelect').value;
+
+      // Use full data for specific playlist selection; 2-year data for ALL view
+      const sourceVideos = (selectedPlaylist !== 'ALL' && allVideosData)
+        ? allVideosData
+        : globalData.videos;
+
+      let filtered = sourceVideos;
+
+      // 1. Filter by Playlist Dropdown Select
+      if (selectedPlaylist !== 'ALL') {
+        filtered = filtered.filter(v => v.playlistId === selectedPlaylist);
+      }
+
+      // 2. Filter by Search keyword (Title + Description)
+      if (search) {
+        filtered = filtered.filter(v =>
+          v.title.toLowerCase().includes(search) ||
+          v.description.toLowerCase().includes(search)
+        );
+      }
+
+      renderVideos(filtered);
+    }
+
+    /**
+     * Renders video cards onto the screen
+     */
+    function renderVideos(videos) {
+      const container = document.getElementById('videoContainer');
+      container.innerHTML = '';
+
+      // Update total videos count info badge
+      document.getElementById('resultsCount').innerText = `พบสื่อแนะนำทั้งหมด ${videos.length} รายการ`;
+
+      if (videos.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-20 text-[var(--text-muted)] text-xs flex flex-col items-center justify-center gap-3">
+            <i class="fa-solid fa-magnifying-glass-minus text-4xl text-slate-300 dark:text-slate-700"></i>
+            <div>ไม่พบรายการคลิปวิดีโอหรือเอกสารที่ตรงกับตัวกรองที่ระบุ</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Build entire HTML string first, then set innerHTML once (avoids per-card reflow)
+      const html = videos.map(v => `
+          <div class="app-card rounded-2xl overflow-hidden flex flex-col h-full shadow-sm hover:shadow-md transition">
+            <!-- Thumbnail cover -->
+            <div class="relative aspect-video bg-slate-100 dark:bg-slate-900 overflow-hidden group">
+              <img src="${v.thumbnail || 'https://images.unsplash.com/photo-1616469829581-73993eb86b02?q=80&w=480&auto=format&fit=crop'}" 
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                   loading="lazy"
+                   alt="${v.title}">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-2.5">
+                <span class="text-[9px] text-white bg-black/50 px-2 py-0.5 rounded backdrop-blur-sm">
+                  <i class="fa-brands fa-youtube mr-1 text-red-500"></i>YouTube
+                </span>
+              </div>
+            </div>
+
+            <!-- Card Body Content -->
+            <div class="p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <!-- Category #tag -->
+                <div class="mb-1 flex flex-wrap gap-1">
+                  <span class="text-[10px] font-semibold uppercase tracking-wide" style="color: var(--accent-color)">
+                    #${v.category}
+                  </span>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-title-scale text-[var(--text-primary)] line-clamp-2 text-left mb-1.5 font-semibold leading-snug" title="${v.title}">
+                  ${v.title}
+                </h3>
+
+                <!-- Published date -->
+                <p class="text-meta-scale font-medium mb-3 flex items-center gap-1.5" style="color: var(--accent-color)">
+                  <i class="fa-solid fa-calendar-day text-[10px]"></i> ${v.publishedAt || 'ไม่ระบุวันที่'}
+                </p>
+
+                <!-- Description -->
+                <p class="text-desc-scale text-[var(--text-secondary)] mb-4 line-clamp-2 text-left leading-relaxed">
+                  ${v.description || 'ไม่มีคำอธิบายสำหรับวิดีโอนี้'}
+                </p>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="pt-3 border-t border-[var(--border-color)] flex items-center justify-between gap-2.5">
+                <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank"
+                   class="bg-red-600 hover:bg-red-700 text-white text-meta-scale px-3 py-1.5 rounded-lg font-semibold shadow-sm transition inline-flex items-center gap-1.5 active:scale-95">
+                  <i class="fa-solid fa-circle-play"></i> รับชมวิดีโอ
+                </a>
+                ${v.resourceLink ? `
+                  <a href="${v.resourceLink}" target="_blank"
+                     class="bg-emerald-600 hover:bg-emerald-700 text-white text-meta-scale px-3 py-1.5 rounded-lg font-semibold shadow-sm transition inline-flex items-center gap-1.5 active:scale-95">
+                    <i class="fa-solid fa-file-arrow-down"></i> เอกสารแนบ
+                  </a>
+                ` : ''}
+              </div>
+            </div>
+          </div>`).join('');
+      container.innerHTML = html;
+    }
+
+    /**
+     * Trigger explicit manual refresh from UI
+     */
+    function refreshData() {
+      if (isRefreshing) return;
+      loadData();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Sornorpoom Learning Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header Section -->
+  <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <h1 class="text-xl font-bold tracking-wide">Sornorpoom Learning Portal</h1>
+        <p class="text-xs text-indigo-200">คลังเรียนรู้ดิจิทัล สื่อและนวัตกรรมการศึกษา</p>
+      </div>
+      
+      <!-- Controls: Playlist Dropdown & Search Bar -->
+      <div class="flex flex-col sm:flex-row w-full md:w-auto gap-2">
+        <select id="playlistSelect" onchange="filterVideos()" 
+                class="bg-indigo-800 text-white text-xs px-3 py-2 rounded-lg border border-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+          <option value="ALL">-- ทุก Playlist --</option>
+        </select>
+        
+        <input type="text" id="searchInput" oninput="filterVideos()" placeholder="ค้นหาคลิป/หัวข้อ..." 
+               class="w-full sm:w-64 px-3 py-2 rounded-lg text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400">
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+    
+    <!-- Category Filter Buttons -->
+    <div class="mb-6 flex flex-wrap items-center gap-2 border-b border-slate-200 pb-4" id="categoryFilters">
+      <button onclick="filterByCategory('ALL', this)" 
+              class="cat-btn bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm hover:bg-indigo-700 transition">
+        ทั้งหมด
+      </button>
+    </div>
+
+    <!-- Video Grid Container -->
+    <div id="videoContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <div class="col-span-full text-center py-16 text-slate-400 text-sm">
+        กำลังโหลดคลังเรียนรู้...
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    © Sornorpoom Learning Portal - สำนักงานศึกษาธิการจังหวัดเชียงใหม่
+  </footer>
+
+  <script>
+    let globalData = { categories: [], playlists: [], videos: [] };
+    let currentCategory = 'ALL';
+
+    window.onload = function() {
+      google.script.run.withSuccessHandler(renderData).getWebData();
+    };
+
+    function renderData(data) {
+      globalData = data;
+      renderCategories(data.categories);
+      renderPlaylistDropdown(data.playlists);
+      renderVideos(data.videos);
+    }
+
+    // สร้างปุ่มหมวดหมู่หลักด้านบน
+    function renderCategories(categories) {
+      const box = document.getElementById('categoryFilters');
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'cat-btn bg-white text-slate-600 border border-slate-200 px-4 py-1.5 rounded-full text-xs font-medium hover:bg-slate-100 transition';
+        btn.innerText = cat;
+        btn.onclick = () => filterByCategory(cat, btn);
+        box.appendChild(btn);
+      });
+    }
+
+    // สร้างรายการ Playlist ใน Dropdown
+    function renderPlaylistDropdown(playlists) {
+      const select = document.getElementById('playlistSelect');
+      playlists.forEach(pl => {
+        const opt = document.createElement('option');
+        opt.value = pl.id;
+        opt.innerText = pl.title;
+        select.appendChild(opt);
+      });
+    }
+
+    function filterByCategory(cat, btnElement) {
+      currentCategory = cat;
+      
+      // สลับสีปุ่มหมวดหมู่หลัก
+      document.querySelectorAll('.cat-btn').forEach(b => {
+        b.className = 'cat-btn bg-white text-slate-600 border border-slate-200 px-4 py-1.5 rounded-full text-xs font-medium hover:bg-slate-100 transition';
+      });
+      if (btnElement) {
+        btnElement.className = 'cat-btn bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm hover:bg-indigo-700 transition';
+      }
+
+      filterVideos();
+    }
+
+    function filterVideos() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const selectedPlaylist = document.getElementById('playlistSelect').value;
+
+      // สร้าง Map สำหรับเทียบ Playlist ID กับ Category
+      const playlistCategoryMap = {};
+      globalData.playlists.forEach(p => {
+        playlistCategoryMap[p.id] = p.category;
+      });
+
+      let filtered = globalData.videos;
+
+      // กรองตามหมวดหมู่หลัก
+      if (currentCategory !== 'ALL') {
+        filtered = filtered.filter(v => playlistCategoryMap[v.playlistId] === currentCategory);
+      }
+
+      // กรองตาม Playlist ที่เลือก
+      if (selectedPlaylist !== 'ALL') {
+        filtered = filtered.filter(v => v.playlistId === selectedPlaylist);
+      }
+
+      // กรองตามคำค้นหา
+      if (search) {
+        filtered = filtered.filter(v => 
+          v.title.toLowerCase().includes(search) || 
+          v.description.toLowerCase().includes(search)
+        );
+      }
+
+      renderVideos(filtered);
+    }
+
+    function renderVideos(videos) {
+      const container = document.getElementById('videoContainer');
+      container.innerHTML = '';
+
+      if (videos.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-16 text-slate-400 text-sm">ไม่พบรายการคลิปวิดีโอที่ค้นหา</div>`;
+        return;
+      }
+
+      videos.forEach(v => {
+        const card = `
+          <div class="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition duration-200 flex flex-col">
+            <div class="relative aspect-video bg-slate-100">
+              <img src="${v.thumbnail || 'https://via.placeholder.com/480x360'}" class="w-full h-full object-cover" alt="${v.title}">
+            </div>
+            <div class="p-3.5 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-semibold text-slate-800 line-clamp-2 text-xs leading-snug mb-1 text-left">${v.title}</h3>
+                <p class="text-[10px] text-indigo-600 font-medium mb-1.5">${v.publishedAt || ''}</p>
+                <p class="text-[11px] text-slate-500 mb-3 line-clamp-2 leading-relaxed text-left">${v.description || ''}</p>
+              </div>
+              <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-1.5">
+                <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" 
+                   class="bg-red-600 hover:bg-red-700 text-white text-[11px] px-2.5 py-1 rounded font-medium transition inline-flex items-center gap-1">
+                   ▶ รับชม
+                </a>
+                ${v.resourceLink ? `
+                  <a href="${v.resourceLink}" target="_blank" 
+                     class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] px-2.5 py-1 rounded font-medium transition">
+                     📄 เอกสาร
+                  </a>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+        container.innerHTML += card;
+      });
+    }
+  </script>
+</body>
+</html>
