@@ -1,17 +1,20 @@
-/**
+﻿/**
  * ============================================================================
  * Project: Sornorpoom Learning Portal (YouTube Web App)
  * Author: ศน.ภูมิ (สำนักงานศึกษาธิการจังหวัดเชียงใหม่)
- * File: Code.gs
- * Description: สคริปต์ฝั่ง Server สำหรับ Sync ข้อมูลจาก YouTube และประมวลผลส่ง Web App
+ *
+ * โครงสร้าง Google Sheets ที่ต้องการ:
+ *   Sheet 1: PLAYLISTS  (A: Playlist_ID, B: Title, C: Desc, D: Thumb, E: Category, F: Target, G: Status)
+ *   Sheet 2: VIDEOS     (A: Video_ID, B: Playlist_ID, C: Title, D: Desc, E: Published_At, F: Duration, G: Thumb, H: Resource_Link, I: Status)
+ *
  * ============================================================================
  */
 
-// Channel ID ของช่อง sornorpoom
-const CHANNEL_ID = 'UCxCBjGfJL25wnIgsOG8KUCw';
+// ตั้งค่า Channel ID ของช่อง YouTube ที่ต้องการ Sync
+const CHANNEL_ID = 'UCxCBjGfJL25wnIgsOG8KUCw'; // ช่อง Sornorpoom Learning Youtube
 
 /**
- * 1. ฟังก์ชันแสดงผลหน้า Web App ( doGET )
+ * 1. Entry Point ของ Web App
  */
 function doGet(e) {
   return HtmlService.createTemplateFromFile('index')
@@ -24,21 +27,45 @@ function doGet(e) {
 /**
  * 2. ฟังก์ชัน Sync ข้อมูลจาก YouTube API ลง Google Sheets
  * (ควรตั้งเวลา Time-driven Trigger ให้รันวันละ 1 ครั้ง)
+ *
+ * [แก้ไข] ป้องกันการเขียนทับค่าที่แก้มือใน Sheet:
+ *   - คอลัมน์ E (Category_ID) : ถ้าเคยกรอกไว้ จะเก็บค่าเดิมไว้
+ *   - คอลัมน์ F (Target_Audience) : ถ้าเคยกรอกไว้ จะเก็บค่าเดิมไว้
+ *   - คอลัมน์ G (Status) : ถ้าเคยเปลี่ยนเป็น Hide จะเก็บค่าเดิมไว้ (ไม่รีเซ็ตกลับเป็น Active)
  */
 function syncYouTubeDataCustom() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const playlistSheet = ss.getSheetByName('PLAYLISTS');
   const videoSheet = ss.getSheetByName('VIDEOS');
-  
+
   if (!playlistSheet || !videoSheet) {
     Logger.log("⚠️ กรุณาตรวจสอบว่ามี Sheet ชื่อ 'PLAYLISTS' และ 'VIDEOS'");
     return;
   }
 
-  // ดึง Playlists ทั้งหมด
+  // ─── Step 1: Backup ค่าที่แก้มือใน PLAYLISTS (E, F, G) ก่อน Sync ─────────
+  const manualPlaylistValues = {};
+  if (playlistSheet.getLastRow() > 1) {
+    const existingData = playlistSheet
+      .getRange(2, 1, playlistSheet.getLastRow() - 1, 7)
+      .getValues();
+    existingData.forEach(row => {
+      const plId = row[0];
+      if (plId) {
+        manualPlaylistValues[plId] = {
+          category : row[4] ? row[4].toString().trim() : '',  // E: Category_ID
+          target   : row[5] ? row[5].toString().trim() : '',  // F: Target_Audience
+          status   : row[6] ? row[6].toString().trim() : ''   // G: Status
+        };
+      }
+    });
+  }
+  Logger.log(`📦 Backup ข้อมูลเดิมใน PLAYLISTS: ${Object.keys(manualPlaylistValues).length} รายการ`);
+
+  // ─── Step 2: ดึง Playlists ทั้งหมดจาก YouTube API ────────────────────────
   let playlists = [];
   let nextPageToken = '';
-  
+
   do {
     let response = YouTube.Playlists.list('snippet,status', {
       channelId: CHANNEL_ID,
@@ -53,25 +80,37 @@ function syncYouTubeDataCustom() {
   let videoRows = [];
   let existingVideoKeys = getExistingVideoKeys(videoSheet);
 
-  // วนลูปอ่านข้อมูล Playlists และ Videos
+  // ─── Step 3: วนลูปสร้าง playlistRows และดึง Videos ──────────────────────
   playlists.forEach(pl => {
-    let plId = pl.id;
-    let plTitle = pl.snippet.title;
-    let plDesc = (pl.snippet.description || "").replace(/\n/g, " ");
-    let plThumb = pl.snippet.thumbnails && pl.snippet.thumbnails.high ? pl.snippet.thumbnails.high.url : '';
-    
+    const plId    = pl.id;
+    const plTitle = pl.snippet.title;
+    const plDesc  = (pl.snippet.description || '').replace(/\n/g, ' ');
+    const plThumb = pl.snippet.thumbnails && pl.snippet.thumbnails.high
+                    ? pl.snippet.thumbnails.high.url : '';
+
+    // ── ดึงค่า manual ที่เคยบันทึกไว้ (ถ้ามี) ──────────────────────────────
+    const prev = manualPlaylistValues[plId] || {};
+
+    // กฎการ Merge:
+    //   E (category) → ใช้ค่าเดิมถ้ามี, ไม่งั้นใส่ว่าง (รอกรอกมือ)
+    //   F (target)   → ใช้ค่าเดิมถ้ามี, ไม่งั้นใส่ว่าง
+    //   G (status)   → ใช้ค่าเดิมถ้ามี, ไม่งั้นตั้งเป็น 'Active'
+    const mergedCategory = prev.category || '';
+    const mergedTarget   = prev.target   || '';
+    const mergedStatus   = prev.status   || 'Active';
+
     // โครงสร้าง A-G ของ PLAYLISTS
     playlistRows.push([
-      plId,        // A: Playlist_ID
-      plTitle,     // B: Playlist_Title
-      plDesc,      // C: Description
-      plThumb,     // D: Thumbnail_URL
-      '',          // E: Category_ID (ระบุหมวดหมู่หลักใน Sheet)
-      '',          // F: Target_Audience
-      'Active'     // G: Status
+      plId,           // A: Playlist_ID
+      plTitle,        // B: Playlist_Title
+      plDesc,         // C: Description
+      plThumb,        // D: Thumbnail_URL
+      mergedCategory, // E: Category_ID   ← คงค่าเดิมที่กรอกมือ
+      mergedTarget,   // F: Target_Audience ← คงค่าเดิมที่กรอกมือ
+      mergedStatus    // G: Status          ← คงค่าเดิม (ไม่รีเซ็ตเป็น Active)
     ]);
 
-    // ดึงวิดีโอใน Playlist นี้
+    // ── ดึงวิดีโอใน Playlist นี้ ─────────────────────────────────────────────
     let vNextToken = '';
     do {
       let vResponse = YouTube.PlaylistItems.list('snippet', {
@@ -82,18 +121,19 @@ function syncYouTubeDataCustom() {
 
       if (vResponse.items) {
         vResponse.items.forEach(item => {
-          let vId = item.snippet.resourceId.videoId;
-          let uniqueKey = vId + '_' + plId;
-          
+          const vId       = item.snippet.resourceId.videoId;
+          const uniqueKey = vId + '_' + plId;
+
           if (!existingVideoKeys.has(uniqueKey)) {
-            let vTitle = item.snippet.title;
-            let vDesc = item.snippet.description || "";
-            let publishedAt = item.snippet.publishedAt;
-            let vThumb = item.snippet.thumbnails && item.snippet.thumbnails.high ? item.snippet.thumbnails.high.url : '';
-            
+            const vTitle      = item.snippet.title;
+            const vDesc       = item.snippet.description || '';
+            const publishedAt = item.snippet.publishedAt;
+            const vThumb      = item.snippet.thumbnails && item.snippet.thumbnails.high
+                                ? item.snippet.thumbnails.high.url : '';
+
             // สกัดดึงลิงก์ Google Drive หรือเอกสารจาก Description อัตโนมัติ (ถ้ามี)
-            let driveUrlMatch = vDesc.match(/https:\/\/(drive|docs)\.google\.com\/[^\s]+/g);
-            let resourceLink = driveUrlMatch ? driveUrlMatch[0] : '';
+            const driveUrlMatch = vDesc.match(/https:\/\/(drive|docs)\.google\.com\/[^\s]+/g);
+            const resourceLink  = driveUrlMatch ? driveUrlMatch[0] : '';
 
             // โครงสร้าง A-I ของ VIDEOS
             videoRows.push([
@@ -115,19 +155,21 @@ function syncYouTubeDataCustom() {
     } while (vNextToken);
   });
 
-  // บันทึกข้อมูลกลับลง Sheet PLAYLISTS (เขียนทับตั้งแต่แถว 2)
+  // ─── Step 4: บันทึก PLAYLISTS กลับลง Sheet (พร้อมค่า manual ที่ restore แล้ว)
   if (playlistRows.length > 0) {
-    playlistSheet.getRange(2, 1, playlistSheet.getLastRow() > 1 ? playlistSheet.getLastRow() - 1 : 1, 7).clearContent();
+    const clearRows = playlistSheet.getLastRow() > 1 ? playlistSheet.getLastRow() - 1 : 1;
+    playlistSheet.getRange(2, 1, clearRows, 7).clearContent();
     playlistSheet.getRange(2, 1, playlistRows.length, 7).setValues(playlistRows);
   }
 
-  // บันทึกข้อมูลเพิ่มลง Sheet VIDEOS (ต่อท้ายรายการเดิม)
+  // ─── Step 5: บันทึก VIDEOS เพิ่มต่อท้าย (ไม่เขียนทับรายการเดิม) ──────────
   if (videoRows.length > 0) {
-    let lastRow = videoSheet.getLastRow();
+    const lastRow = videoSheet.getLastRow();
     videoSheet.getRange(lastRow + 1, 1, videoRows.length, 9).setValues(videoRows);
   }
 
-  Logger.log(`✅ อัปเดตข้อมูลเรียบร้อย! Sync Playlist ${playlistRows.length} รายการ และเพิ่ม Video ใหม่ ${videoRows.length} รายการ`);
+  Logger.log(`✅ Sync เสร็จ! Playlist ${playlistRows.length} รายการ | Video ใหม่ ${videoRows.length} รายการ`);
+  Logger.log(`🔒 ค่าที่แก้มือ (Category/Target/Status) ใน PLAYLISTS ได้รับการอนุรักษ์ไว้เรียบร้อย`);
 }
 
 /**
@@ -205,10 +247,10 @@ function getWebData() {
     videos.sort((a, b) => b.rawDate - a.rawDate);
   }
 
-  return { 
-    categories: Array.from(categoriesSet), 
-    playlists: playlists, 
-    videos: videos 
+  return {
+    categories: Array.from(categoriesSet),
+    playlists: playlists,
+    videos: videos
   };
 }
 
@@ -224,3 +266,4 @@ function getExistingVideoKeys(sheet) {
   }
   return set;
 }
+
